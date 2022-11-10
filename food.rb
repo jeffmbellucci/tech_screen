@@ -1,5 +1,3 @@
-require './underscore'
-
 class Food
   include Underscore
   # Included to_s method to give something for the different foods to inherit
