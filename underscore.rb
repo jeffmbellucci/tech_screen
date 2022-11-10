@@ -1,4 +1,4 @@
-# underscore method copied from Rails active_support
+# underscore method copied from Rails active_support to demonstrate a module
 module Underscore
   def underscore(camel_cased_word)
     return camel_cased_word.to_s unless /[A-Z-]|::/.match?(camel_cased_word)
