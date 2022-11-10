@@ -117,12 +117,12 @@ end
 ```
 
 # Scaffolding and commands to build
-```rails new diet-app```
-```rails g scaffold Providers name:string email_address:string```
-```rails g scaffold Clients name:string email_address:string```
-```rails g scaffold JournalEntries content:text client_id:integer client:references```
-```rails g scaffold Plans provider_id:integer client_id:integer tier:string client:references provider:references```
- ```rails db:create db:migrate```
+```rails new diet-app```<br>
+```rails g scaffold Providers name:string email_address:string```<br>
+```rails g scaffold Clients name:string email_address:string```<br>
+```rails g scaffold JournalEntries content:text client_id:integer client:references```<br>
+```rails g scaffold Plans provider_id:integer client_id:integer tier:string client:references provider:references```<br>
+ ```rails db:create db:migrate```<br>
  ```rails s```
 
 #### Routing
