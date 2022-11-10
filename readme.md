@@ -57,8 +57,8 @@ Create classes Cat, Dog, Chicken, CatFood, DogFood, HumanFood, Lemons
 - The fast approach appears to run in O(n) time, while my brute force approach is O(n^2), which becomes more obvious the longer you set it to run, in terms of how far they each get.
 - I execute it twice, once for 5 seconds and print the largest prime like the instructions say, and then once for 5 milliseconds. I added an option to print an array of all the primes found if `true` is passed to the `PrimeFinder#new` method as a second argument, so that you can see that it works correctly. I chose 5ms for printing the primes list in order to avoid blowing up the terminal with tens of thousands of primes. Also, just delete the `true` passed to `new` if you want ignore the list of primes. Printing all primes defaults as `false`.
 - The `PrimeFinder` is invoked with a `runtime` value in seconds (or decimal fractions) and an optional print boolean, ie.
-  - `PrimeNumberFinder.new(5) # prints largest and total number of primes found in 5 secs`
-  - `PrimeNumberFinder.new(0.1, true) # same as above but with the array of all primes found in 100ms`
+  - `PrimeNumberFinder.new(5)` - prints largest and total number of primes found in 5secs
+  - `PrimeNumberFinder.new(0.005, true)` - same as above but with the array of all primes found in 5ms
  
 ### Database and model design with queries
 We want to model providers (e.g. dietitians), their clients, and journal entries.
