@@ -100,20 +100,17 @@ end
 ```
 
 #### We want to be able to do these queries:
-- Find all clients for a particular provider: 
-```Ruby 
+```Ruby
+# Find all clients for a particular provider: 
 @clients = Provider.find(:id).clients
-```
-- Find all providers for a particular client: 
-```Ruby 
+
+# Find all providers for a particular client: 
 @providers = Client.find(:id).clients
-```
-- Find all of a particular client's journal entries, sorted by date posted:
-```Ruby 
+
+# Find all of a particular client's journal entries, sorted by date posted:
 @entries = Client.find(:id).journal_entries.order(created_at: :desc) # recent first, ':asc' for oldest first
-```
-- Find all of the journal entries of all of the clients of a particular provider, sorted by date posted:
-```Ruby 
+
+# Find all of the journal entries of all of the clients of a particular provider, sorted by date posted: 
 @entries = Provider.find(:id).clients.includes(:journal_entries).order(created_at: :desc) # recent first, ':asc' for oldest first
 ```
 
