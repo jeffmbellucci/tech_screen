@@ -1,6 +1,6 @@
-## Instruction
+## Instructions
 
-###Short answer
+###Short Answer
 Answer with something like 1–4 sentences. We aren't looking for a precise technical definition. Answer in a way that you think is relevant to your software engineering work. If you don't know an answer, don't copy/paste from the web - just give whatever info you know.
 
 - **What is HTML?**<br>
