@@ -104,16 +104,39 @@ end
 #### We want to be able to do these queries:
 ```Ruby
 # Find all clients for a particular provider: 
-@clients = Provider.find(:id).clients # ':id' in these cases is usually the integer id passed in via params[:id]
+@clients = Provider.find(params[:id]).clients 
 
 # Find all providers for a particular client: 
-@providers = Client.find(:id).clients
+@providers = Client.find(params[:id]).clients
 
 # Find all of a particular client's journal entries, sorted by date posted:
-@entries = Client.find(:id).journal_entries.order(created_at: :desc) # recent first, ':asc' for oldest first
+@entries = Client.find(params[:id]).journal_entries.order(created_at: :desc) # recent first, ':asc' for oldest first
 
 # Find all of the journal entries of all of the clients of a particular provider, sorted by date posted: 
-@entries = Provider.find(:id).clients.includes(:journal_entries).order(created_at: :desc) # recent first, ':asc' for oldest first
+@entries = Provider.find(params[:id]).clients.includes(:journal_entries).order(created_at: :desc) # recent first, ':asc' for oldest first
+```
+
+# Scaffolding and commands to build
+`rails new diet-app`
+`rails g scaffold Providers name:string email_address:string`
+`rails g scaffold Clients name:string email_address:string`
+`rails g scaffold JournalEntries content:text client_id:integer client:references`
+`rails g scaffold Plans provider_id:integer client_id:integer tier:string client:references provider:references`
+ `rails db:create db:migrate`
+ `rails s`
+
+#### Routing
+```Ruby
+Rails.application.routes.draw do
+  resources :providers do
+    resources :clients
+  end
+  resources :clients do
+    resources :providers
+    resources :entries
+  end
+
+  root to: "providers#index
 ```
 
 
