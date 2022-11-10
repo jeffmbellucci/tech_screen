@@ -1,7 +1,7 @@
 class Animal
   attr_accessor :sound, :food_preference
   
-  def initialize(options)
+  def initialize(options = {})
     options = {sound: "animal noise", food_preference: {likes: [HumanFood], dislikes: []}}.merge(options)
     @sound = options[:sound]
     @food_preference = options[:food_preference]

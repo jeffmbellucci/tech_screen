@@ -19,8 +19,8 @@ rex = Dog.new({
   }
 })
 
-# Created an extra animal to show how flexible the animals class is
-rocky = Raccoon.new(sound: "squeak", food_preference: {likes: [HumanFood], dislikes: []})
+# Created an extra animal to show how flexible the animals class can be
+rocky = Raccoon.new
 
 puts "Running animal and food classes.."
 food_choices = [Chicken.new, CatFood.new, DogFood.new, HumanFood.new, Lemon.new]
@@ -32,6 +32,6 @@ end
 
 sleep 1
 
-puts "\nNow Running prime number finder...\n"
-PrimeFinder.new(5).print_findings
-PrimeFinder.new(0.005).print_findings(true)
+puts "\nNow running prime number finder...\n\n"
+PrimeNumberFinder.new(5)
+PrimeNumberFinder.new(0.005, true)
