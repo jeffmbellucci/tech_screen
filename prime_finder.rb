@@ -22,18 +22,20 @@ class PrimeFinder
     primes
   end
 
+  # Print nicely formatted findings
   def print_findings(print_all_primes = false)
     fast_primes, slow_primes = {fast_primes: find_primes(:fast)}, {slow_primes: find_primes(:slow)}
     puts fast_primes if print_all_primes
+    puts "\n"
     puts slow_primes if print_all_primes
   end
   
   private
 
   def prime?(n, method)
-    if method == :fast
+    if method == :fast # Ruby Prime library
       Prime.prime?(n)
-    elsif method == :slow
+    elsif method == :slow # Brute force
       factors = []
       1.upto(n/3) { |factor| factors << n if (n % factor).zero? }
       factors.length == 1
