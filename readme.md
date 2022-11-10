@@ -71,7 +71,7 @@ We want to model providers (e.g. dietitians), their clients, and journal entries
 #### Model Schema:
 - Providers ```name: string, email_address: string, id: integer```
 - Clients ```name: string, email_address: string, id: integer```
-- Plans ```provider_id: integer, client_id: integer, tier: string``` `basic` or `premium`
+- Plans ```provider_id: integer, client_id: integer, tier: string``` `"basic"` or `"premium"`
 - JournalEntries ```content: text, client_id: integer```
 
 - Note: `uuid` is also an option instead of integer ids, and an `enum` could be used in place of a `string` for plan `tier`
