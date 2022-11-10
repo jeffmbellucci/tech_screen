@@ -7,7 +7,7 @@ Answer with something like 1–4 sentences. We aren't looking for a precise tech
 HTML stands for Hyper Text Markup Language and creates the primary structure of any webpage and the Dom.  HTML uses opening and closing tags (ie. "p", "div", "span", etc.) to delinate where different page elements begin and end.  Each tag has some inherent properties, but in modern web pages the most common tag is a "div".  Tags can also be nested to create any layout, limited only by imagination.
 - **What is CSS?**<br>
 CSS stands for Cascading Sheet Style and gives instructions for how each element on a page should look via the use of id's or classes assigned to HTML elements.  There are an incredible number of CSS properties that you can use to make a page look how you want, for example fonts, font-sizing, coloring of anything, shadows, layering via z-index, borders,  intructions for how elements should react to different screen-sizes, widths, heights, opacity, and on and on.  I were to try to describe all the available CSS properties here, it would end up being a book...
-- What is the DOM?**<br>
+- **What is the DOM?**<br>
 DOM stands for Document Object Model and is essential the base data structure of a web-page.  It would be best described as a tree data structure where each HTML element makes up an individual node on that tree.
 - **What is TCP/IP?**<br>
 TCP/IP stands for Transmission Control Protocol/Internet Protocol and is the primary data transfer protocol that allows the modern internet to function.
@@ -75,7 +75,7 @@ We want to model providers (e.g. dietitians), their clients, and journal entries
 - Plans ```provider_id: integer, client_id: integer, tier: string``` `basic` or `premium`
 - JournalEntries ```content: text, client_id: integer```
 
-- Note: `uuid` is also an option instead of integer ids, and an `enum` could be used in place of a string for plan `tier`
+- Note: `uuid` is also an option instead of integer ids, and an `enum` could be used in place of a `string` for plan `tier`
 
 #### Relationships:
 - The following code will establish all the necessary relationships, and the above schema will makes queries possible.
