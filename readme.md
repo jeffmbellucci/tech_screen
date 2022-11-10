@@ -102,7 +102,7 @@ end
 #### We want to be able to do these queries:
 ```Ruby
 # Find all clients for a particular provider: 
-@clients = Provider.find(:id).clients # ':id' is usually the integer id passed via params[:id]
+@clients = Provider.find(:id).clients # ':id' in these cases is usually the integer id passed in via params[:id]
 
 # Find all providers for a particular client: 
 @providers = Client.find(:id).clients
