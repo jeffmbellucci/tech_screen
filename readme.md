@@ -1,6 +1,6 @@
 ## Instructions
 
-###Short Answer
+### Short Answer
 Answer with something like 1–4 sentences. We aren't looking for a precise technical definition. Answer in a way that you think is relevant to your software engineering work. If you don't know an answer, don't copy/paste from the web - just give whatever info you know.
 
 - **What is HTML?**<br>
@@ -42,18 +42,19 @@ Create classes Cat, Dog, Chicken, CatFood, DogFood, HumanFood, Lemons
 ### Include a driver file which requires the files, instantiates the classes, and invokes the methods to demonstrate the functionality.
 - How to run:
   - unzip file, open terminal, `cd` into the `health_tech_screen` directory
-  - If ruby is installed on the machine, the type `ruby main.rb` and everything will execute
+  - If ruby is installed on the machine, just type `ruby main.rb` and everything will execute
 
 ### Details:
 #### Animal and food classes:
-- I created parent `Animal` and `Food` classes, that each animal and food class inherits from
-- I noticed that neither the cat nor the dog like lemons, so I throw and catch an error when you feed them one
-- I also created a `Raccoon` class to show how easily extensible the animal class is. They only like HumanFood, as is true for all trash pandas. Also, raccoons have no dislines because of course they don't. However, they also don't know what lemons are.
-- Upon execution, all of the foods are tried by all of the animals, printing what each is trying and how many noises they make, as well as the error message when you feed anything a lemon.
+- I created parent `Animal` and `Food` classes that each animal and food class inherits from.
+- Animals take an options hash to override default values.
+- I noticed that neither the cat nor the dog like lemons, so I throw and catch an error when you feed them one.
+- I also created a `Raccoon` class to show how easily extensible the animal class is. They only like HumanFood, as is true for all trash pandas. Also, raccoons have no dislikes because of course they don't. However, they also don't know what lemons are.
+- Upon execution, all of the foods are tried by all of the animals, printing what each is trying and how many noises they make, as well as an error message when you feed anything a lemon.
 
 #### Prime Number finder:
 - The prime number finder uses two methods for finding primes, one uses the built in Ruby 'prime' library and the other is just brute force
-- I included any many optimizations as I could think of (ie. the fact that all primes after 2 and 3 are in the form of 6n+1 or 6n-1, only check the first 1/3 of factors instead of all factors 1 up to n, etc.)
+- I included as many little optimizations as I could think of (ie. the fact that all primes after 2 and 3 are in the form of 6n+1 or 6n-1, only need to check the first 1/3 of factors instead of all factors 1 up to n, etc.)
 - The fast approach appears to run in O(n) time, while I know the brute force approach is O(n^2), which interestingly becomes more obvious the longer you set it to run.
 - I execute it twice, once for 5 seconds as the instructions say, and then once for 5 milliseconds which I pass an option to print all the primes it finds, so that you can see that it works correctly, I chose 5ms for printing the outputs in order to avoid blowing up the terminal with tens of thousands of primes, but feel free to run it for as long as you want.  The initializer takes runtime in seconds (or decimal fractions of a second).
  
@@ -68,16 +69,16 @@ We want to model providers (e.g. dietitians), their clients, and journal entries
 - Clients post journal entries. These consist of freeform text.
 
 ### Model and relationship design
-#### Models
+#### Model Schema:
 - Providers ```name: string, email_address: string, id: integer```
 - Clients ```name: string, email_address: string, id: integer```
-- Plans ```provider_id: integer, client_id: integer, tier: string```
+- Plans ```provider_id: integer, client_id: integer, tier: string``` `basic` or `premium`
 - JournalEntries ```content: text, client_id: integer```
 
-- Note: `uuid` is also an option instead of integer ids, and an `enum` could be used in place of a string
+- Note: `uuid` is also an option instead of integer ids, and an `enum` could be used in place of a string for plan `tier`
 
-#### Relationships
-- The following code will establish all the necessary relationships and the above schema makes queries possible
+#### Relationships:
+- The following code will establish all the necessary relationships, and the above schema will makes queries possible.
 
 ```Ruby 
 class Clients < ApplicationRecord
@@ -99,8 +100,7 @@ class JournalEntries < ApplicationRecord
 end
 ```
 
-We want to be able to do these queries:
-
+#### We want to be able to do these queries:
 - Find all clients for a particular provider: 
 ```Ruby 
 @clients = Provider.find(:id).clients
