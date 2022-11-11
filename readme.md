@@ -137,9 +137,9 @@ Rails.application.routes.draw do
   root to: "client#index" # or whatever you want the root/home action to be
 end
 ```
-- **Note: This will create some routes that have duplicate calls to some of the controller actions.  Without knowing how we want the application to look/function for to two user types, I can only take best guesses as to which ones to prune later**
+- **Note:** This will create some routes that have duplicate calls to some of the controller actions.  Without knowing how we want the application to look/function for the two user types, I can only take best guesses as to which ones to prune as I develop the app further
 - Add the relationship code to the respective models 
-  - **Note: The `belongs_to:` relationship code is not here like above, since the generators already added it to those models).**
+  - **Note:** The `belongs_to:` relationship code is not here like above, since the generators already added it to those models).
 ```Ruby 
 class Clients < ApplicationRecord
   has_many :providers, through: plans
@@ -151,9 +151,7 @@ class Providers < ApplicationRecord
 end
 ```
 - Copy the custom queries into the controller actions where you want to use them. 
-  - **Note: (params permissions, and how you access the correct params from the params hash may need to be change depending on which controller/action you choose for the query, since different controllers receive params in different format. 
-  For example, in some cases `clients` will have its id come in as `params[:id]`, but others may be `params[:client_id]`). However, the fundamental logic/format of the queries is sound in principle.**
-- At the command line, use `rails routes` to see all the routes/actions and how the `id` params are passed into controller actions.
+  - **Note:** (params permissions, and how you access the correct params from the params hash may need to be change depending on which controller/action you choose for the query, since different routes/controllers send/receive params differently. For example, in some cases `clients` will have its `:id` available via `params[:id]`, but in others cases `params[:client_id]` may be how it is accessed). However, the fundamental logic/format of the queries is sound, you just may need to update how you access the `:id` that is passed in the params hash.
 ```Ruby 
 @clients = Provider.find(params[:id]).clients # Find all clients for a particular provider
 @providers = Client.find(params[:id]).providers # Find all providers for a particular client
@@ -162,7 +160,8 @@ end
 # Find all of the journal entries of all of the clients of a particular provider, sorted by date posted
 @entries = Provider.find(params[:id]).clients.includes(:journal_entries).order(created_at: :desc) # recent first, ':asc' for oldest first
 ```
+- **Note:** At the command line, use `rails routes` at anytime to see the list of all routes and associated actions, path/url methods,  and the form of the `id` params for any controllers/actions, `rails routes` is always a useful reference.
 - Type `rails s` to create a server on your local machine.
 - navigate to `localhost:3000` in a browser, and you should see the new application running.
 
-- **Note: These instructions will get the app up and running, with more of 99% of the necessary code created by the generators and/or pasted from this readme file. However, some routes and param permissions may need to be adjusted or pruned depending on how you want to display data, and which actions/views you want to use.  There are always multiple ways to accomplish your preferred functionality with Rails.**
+- **Note:** These instructions will get the app up and running, with more of 99% of the necessary code created by the generators and/or pasted from this readme file. However, some routes and param permissions may need to be adjusted or pruned depending on how you want to display data, and which actions/views you want to use.  There are always multiple ways to accomplish your preferred functionality with Rails.
