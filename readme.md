@@ -40,8 +40,8 @@ Create classes Cat, Dog, Chicken, CatFood, DogFood, HumanFood, Lemons
 
 #### Include a driver file which requires the files, instantiates the classes, and invokes the methods to demonstrate the functionality.
 - **How to run:**
-  - Unzip file, open terminal, `cd` into the `healthie_tech_screen` directory
-  - If ruby is installed on the machine, just type `ruby main.rb` and everything will execute
+  - Unzip file, open terminal, `cd` into the `healthie_tech_screen` directory.
+  - If ruby is installed on the machine, just type `ruby main.rb` and everything will execute.
 
 ### Details:
 #### Animal and food classes:
