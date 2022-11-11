@@ -116,7 +116,7 @@ end
 @entries = Provider.find(params[:id]).clients.includes(:journal_entries).order(created_at: :desc) # recent first, ':asc' for oldest first
 ```
 
-#### Scaffolding and commands to build diet-app
+#### Terminal commands to create and scaffold models for the diet-app
 - `rails new diet-app`
 - `cd diet-app`
 - `rails g scaffold Provider name:string email_address:string`
@@ -124,15 +124,25 @@ end
 - `rails g scaffold JournalEntry content:text client:references`
 - `rails g scaffold Plan tier:string client:references provider:references`
 -  `rails db:create db:migrate`
-- Aopy the below routing into 'config/routes.rb' file 
+- Copy the below routing into `config/routes.rb` file 
   - This will create some routes that have duplicate calls to some of the controller actions.  Without knowing how we want the application to look to the users, I can only guess as to which ones are best to prune
 - Add the above relationships to the respective models (if the scaffold generator didn't already)
-- Add and adjust these queries from into the appropriate controller actions (params permissions and accessing the hash may need to change depending on which controller you add the query), but the logic/format is sound in principle.
-  - ```Ruby @clients = Provider.find(params[:id]).clients```
-  - ```Ruby @providers = Client.find(params[:id]).providers```
-  - ```Ruby @entries = Client.find(params[:id]).journal_entries.order(created_at: :desc) # recent first, ':asc' for oldest first```
-  - ```Ruby@entries = Provider.find(params[:id]).clients.includes(:journal_entries).order(created_at: :desc)```
-
+- Copy the following queries into the controller actions where you want to use them. 
+  - Note (params permissions, and how you access the correct params from the params hash may need to be change depending on which controller/action you choose for the query, since different controllers receive params in different format. 
+  - For example, in some cases `clients` will have its id come in as `params[:id]`, but others may be `params[:client_id]`). However, the fundamental logic/format of the queries is sound in principle.
+- At the command line, use `rails routes` to see all the routes/actions and how the `id` params are passed into controller actions.
+  ```Ruby 
+  @clients = Provider.find(params[:id]).clients
+  ```
+  ```Ruby 
+  @providers = Client.find(params[:id]).providers
+  ```
+  ```Ruby
+  @entries = Client.find(params[:id]).journal_entries.order(created_at: :desc) # recent first, ':asc' for oldest first
+  ```
+  ```Ruby
+  @entries = Provider.find(params[:id]).clients.includes(:journal_entries).order(created_at: :desc)
+  ```
 - `rails s`
 - navigate to `localhost:3000` in a browser, and you should see the new application running.
 
