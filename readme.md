@@ -79,7 +79,7 @@ We want to model providers (e.g. dietitians), their clients, and journal entries
 - Note: `uuid` is also an option instead of integer ids, and an `enum` could be used in place of a `string` for plan `tier`
 
 #### Relationships:
-- The following code will establish all the necessary relationships, and the above schema will makes queries possible.
+- The following model code will establish all the necessary relationships, and along with the schema describled above, relationships will connect models as described per the app description.
 
 ```Ruby 
 class Clients < ApplicationRecord
@@ -124,7 +124,7 @@ end
 - `rails g scaffold JournalEntry content:text client:references`
 - `rails g scaffold Plan tier:string client:references provider:references`
 -  `rails db:create db:migrate`
-- Copy the below routing into `config/routes.rb` file 
+- Copy the **routing** described into `config/routes.rb` file 
   - This will create some routes that have duplicate calls to some of the controller actions.  Without knowing how we want the application to look to the users, I can only guess as to which ones are best to prune
 - Add the above relationships to the respective models (if the scaffold generator didn't already)
 - Copy the following queries into the controller actions where you want to use them. 
@@ -143,10 +143,11 @@ end
   ```Ruby
   @entries = Provider.find(params[:id]).clients.includes(:journal_entries).order(created_at: :desc)
   ```
-- `rails s`
+- Add the **relationships** code from above into the respective model files if one of the generators hasn't already.
+- Type `rails s` to create a server on your local machine.
 - navigate to `localhost:3000` in a browser, and you should see the new application running.
 
-- **Note: The above instructions will get the app up and running, with more of 99% of code necessary created by the generators and/or pasted from this readme. However some routes and param permissions will need to be adjusted or pruned depending on how you want to display data, and which views want to use.  There is always multiple ways to accomplish functionality in Rails.**
+- **Note: The instructions will get the app up and running, with more of 99% of code necessary created by the generators and/or pasted from this readme. However some routes and param permissions will need to be adjusted or pruned depending on how you want to display data, and which views want to use.  There is always multiple ways to accomplish functionality in Rails.**
 
 #### Routing
 ```Ruby
