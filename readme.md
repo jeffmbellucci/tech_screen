@@ -71,31 +71,33 @@ We want to model providers (e.g. dietitians), their clients, and journal entries
 
 ### Model and relationship design
 #### Model Schema:
-- `Providers` ```name: string, email_address: string, id: integer```
-- `Clients` ```name: string, email_address: string, id: integer```
-- `Plans` (join table) ```provider_id: integer, client_id: integer, tier: string``` `"basic"` or `"premium"`
-- `JournalEntries` ```content: text, client_id: integer```
+- **Providers** ```name: string, email_address: string, id: integer```
+- **Clients** ```name: string, email_address: string, id: integer```
+- **Plans** (join table) ```provider_id: integer, client_id: integer, tier: string``` `"basic"` or `"premium"`
+- **JournalEntries** ```content: text, client_id: integer```
 - **Note: `uuid` is also an option instead of integer ids, and an `enum` could be used in place of a `string` for plan `tier`**
 
 #### Relationships:
-- This following model code will establish all the necessary relationships, and along with the schema describled above, relationships will connect models as described per the app description.
+- The following model code will establish all the necessary relationships, and along with the schema describled above, relationships will connect models as described per the app description.
 ```Ruby 
 class Clients < ApplicationRecord
-  has_many :providers, through: plans
-  has_many :journal_entries
+  has_many :plans
+  has_many :providers, through: :plans
+  has_many :journal_entries, dependent: :destroy # delete any user journal entries if user they belong to is ever deleted
 end
 
 class Providers < ApplicationRecord
-  has_many :clients, through: plans
+  has_many :plans
+  has_many :clients, through: :plans
 end
 
 class Plans < ApplicationRecord
-  belongs_to: client
-  belongs_to: provider
+  belongs_to :client
+  belongs_to :provider
 end
 
 class JournalEntries < ApplicationRecord
-  belongs_to: client
+  belongs_to :client
 end
 ```
 
@@ -111,57 +113,99 @@ end
 @entries = Client.find(params[:id]).journal_entries.order(created_at: :desc) # recent first, ':asc' for oldest first
 
 # Find all of the journal entries of all of the clients of a particular provider, sorted by date posted: 
-@entries = Provider.find(params[:id]).clients.includes(:journal_entries).order(created_at: :desc) # recent first, ':asc' for oldest first
+@entries = Provider.find(params[:id]).clients.includes(:journal_entries).order(created_at: :desc).map {|client| client.journal_entries } # recent first, ':asc' for oldest first
 ```
 
-### Instructions with terminal commands for creating and scaffold models for a new *diet-app*
+#### Instructions with terminal commands for creating and scaffolding the a new *diet-app*
 - `rails new diet-app`
 - `cd diet-app`
 - `rails g scaffold Provider name:string email_address:string`
 - `rails g scaffold Client name:string email_address:string`
 - `rails g scaffold JournalEntry content:text client:references`
 - `rails g scaffold Plan tier:string client:references provider:references`
--  `rails db:create db:migrate`
-- Copy this **routing** into `config/routes.rb` file:
+- ** Note: The scaffold generators added indexes on all the foreigh keys.  Indexes are an optimization to always keep in mind for speeding up some queries.  However, do not add indexes on everything, only `ids` or columns that are regularly used as a lookup for models that are read frequently.  You don't want to use indexes on columns that are regularly written to in the database.  While indexes can make lookups faster, they can also make writing to the database slower.  Use them judiciously.  In general, it is easiest to add indexes before you make a new model migration, but you can add indexes at any time via a new migration.
+- Copy the following code over everything in the `db/seeds.rb` file
+  - **Note:** The seed file creates 3 clients, 3 providers, 6 plans, 12 journal entries, and makes sure every model created has all necessary relationships.  Always feel free to edit the seeds or create your own, but we need at least some data to make sure everything is working.
 ```Ruby
-Rails.application.routes.draw do
-  resources :providers do
-    resources :clients
-  end
-  resources :clients
-    resources :providers
-    resources :entries
-    resources
-  end
+client_names = %w[alice bob charles]
+provider_names = %w[dan ed fran]
+lorem_ipsum = %w[Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum]
 
-  root to: "client#index" # or whatever you want the root/home action to be
+clients = client_names.map do |name| # make 3 clients
+  Client.create({name: name.capitalize, email_address: "#{name}@fake_client.com"})
+end
+
+providers = provider_names.map do |name| #make 3 providers
+  Provider.create({name: name.capitalize, email_address: "#{name}@fake_provider.com"})
+end
+
+clients.each.with_index(3) do |client, i| #make journal entries minimum of 3 per client
+  i.times { JournalEntry.create({ content: lorem_ipsum.sample(20).join(' '), client: client }) }
+end
+
+providers.each_with_index do |provider, i| # create relationship between clients/providers
+  # 1st provider has 3 plans/clientx, 2nd has 2 plans/clients, 3rd has 1 plans/client
+  # 1st client has have 1 plan/provider, 2nd has 2 plans/providers, 3rd has 3 plans/providers
+  tier = %w[basic premium].sample
+  i.upto(2) { |j| Plan.create({provider: provider, client: clients[j], tier: tier}) }
 end
 ```
-- **Note:** This will create some routes that have duplicate calls to some of the controller actions.  Without knowing how we want the application to look/function for the two user types, I can only take best guesses as to which ones to prune as I develop the app further
-- Add the relationship code to the respective models 
-  - **Note:** The `belongs_to:` relationship code is not here like above, since the generators already added it to those models).
+-  Run `rails db:create db:migrate db:seed`
+- **Optional:** Create nested **routing** in `config/routes.rb` file if you want to play around with nested routes. However, I recommend using the default routing created for you at least at first for getting basic functionality working, and then go for experimentation with the routes.
+- Add `root to: <controller>#<action>` for whatever you want the app's base URL/`localhost:3000` to display, as well as setting the `root_path` and `root_url` helper methods.  I set mine to the client index.
+- This is what your `config/routes.rb` file should look like after you run all the generators and add a `root` path
+```Ruby
+Rails.application.routes.draw do
+  resources :plans
+  resources :journal_entries
+  resources :clients
+  resources :providers
+ 
+  root "clients#index" # or whatever you want the root/home action to be
+end
+```
+- **Note:** If you do use the nested routing instead of the defaults provided by the generators, it may create some routes that have duplicate calls to some controller actions.  Without knowing how we want the application to look/function for the user types at first, it might be difficult to decide which routeesto use and which to prune this early on the app development.  I think it's easiest to stick with default routing for awhile (When in doubt, follow the KISS principle, otherwise Murphy may getcha.)
+- Add the following relationship code to the respective models 
+  - **Note:** The `belongs_to:` relationship code is different here than what I listed above, because passing the gerators a `references` argument will have added them to the `JournalEntries` and `Provider` models, since those are the two models that have foreign keys on their schemas.
 ```Ruby 
 class Clients < ApplicationRecord
-  has_many :providers, through: plans
+  has_many :providers, through: :plans
   has_many :journal_entries
 end
 
 class Providers < ApplicationRecord
-  has_many :clients, through: plans
+  has_many :clients, through: :plans
 end
 ```
-- Copy the custom queries into the controller actions where you want to use them. 
-  - **Note:** (params permissions, and how you access the correct params from the params hash may need to be change depending on which controller/action you choose for the query, since different routes/controllers send/receive params differently. For example, in some cases `clients` will have its `:id` available via `params[:id]`, but in others cases `params[:client_id]` may be how it is accessed). However, the fundamental logic/format of the queries is sound, you just may need to update how you access the `:id` that is passed in the params hash.
+- Copy the custom queries into the controller actions where you want to use them.  I thought it was appropriate to put them in `providers#show` and `clients#show`, but you may have a different preference for how you want to use them.
+  - **Note:** (Again, if you change the default routing, params permitting, how you access ids from the params hash may need to be be updated if you used nested routing, since different routes/controllers send/receive params differently. For example, in some cases with nested routes, `clients` will have its `:id` available via `params[:id]`, but with other routes/controllers `params[:client_id]` may be how it is accessed). 
+  - I the fundamental logic/format of the queries is sound, you just may need to update how you access the `:id` that is passed in the params hash if you change the routing.
+  - **I found that the fastest way to show that all the queries are working, is to put everything called on the Providers class in `providers#show`, so queries 1 and 4, where we have access to the `provider` `:id` exactly how it is written below.
+  - Same thing goes for `clients#show` for queries 2 and 3.
 ```Ruby 
-@clients = Provider.find(params[:id]).clients # Find all clients for a particular provider
+@clients = Provider.find(params[:id]).clients # Find all clients for a particular provider, put in providers#show
 @providers = Client.find(params[:id]).providers # Find all providers for a particular client
-# Find all of a particular client's journal entries, sorted by date posted
+# Find all of a particular client's journal entries, sorted by date posted, put in clients#show
 @entries = Client.find(params[:id]).journal_entries.order(created_at: :desc) # recent first, ':asc' for oldest first
-# Find all of the journal entries of all of the clients of a particular provider, sorted by date posted
-@entries = Provider.find(params[:id]).clients.includes(:journal_entries).order(created_at: :desc) # recent first, ':asc' for oldest first
+# Find all of the journal entries of all of the clients of a particular provider, sorted by date posted, put in clients#show
+@entries = Provider.find(params[:id]).clients.includes(:journal_entries).order(created_at: :desc).map {|client| client.journal_entries } # recent first, ':asc' for oldest first, put in providers#show
 ```
-- **Note:** At the command line, use `rails routes` at anytime to see the list of all routes and associated actions, path/url methods,  and the form of the `id` params for any controllers/actions, `rails routes` is always a useful reference.
-- Type `rails s` to create a server on your local machine.
+- you can use the generated `set_<model>` methods to find the appropriate model instance, if you do, the queries will look like:
+```Ruby
+# In the Clinet controller, under the #show action in my case
+@providers = set_client.providers
+@entries = set_client.journal_entries.order(created_at: :desc)
+# In the Providers controller, under the #show action in my case
+@clients = set_provider.clients 
+@entries = set_provider.clients.includes(:journal_entries).order(created_at: :desc).map { |client| client.journal_entries }
+```
+- **Note:** At the command line, use `rails routes` at anytime to see a list of all routes and associated actions, path/url methods,  and the form of the `id` params for any controllers/actions, `rails routes` is always a useful reference.
+- Now you should be ready to type `rails s` to run the server on your local machine, if you haven't already
 - navigate to `localhost:3000` in a browser, and you should see the new application running.
 
-- **Note:** These instructions will get the app up and running, with more of 99% of the necessary code created by the generators and/or pasted from this readme file. However, some routes and param permissions may need to be adjusted or pruned depending on how you want to display data, and which actions/views you want to use.  There are always multiple ways to accomplish your preferred functionality with Rails.
+- **Note:** These instructions will get the app up and running with more of 99% of the necessary code created by the generators and/or pasted from this readme file. However, some views may need to be adjusted depending on how you want to display data, and which actions/views you decide to use want to use most. 
+- There are always multiple ways to accomplish your preferred functionality with Rails.  
+- I chose to primarily use `providers#index`, `providers#show`, `clients#index`, and `clients#show` to display the data I created in the seed file or with forms, and I added links to be able to switch back and forth between those two indexes as well as adding other convenience links.
+
+#### Final Note:
+I tried to write this last part of this readme for how to get the Rails app running as if I was instructing someone new how to create this app from scratch.  Please don't take it this document as if I don't think you guys know how to do everything here, either same or better.  I wanted to show how I generally write documentation.  I try to be as detailed as possible, and I like to think I have gotten pretty good at creating solid documentation.
