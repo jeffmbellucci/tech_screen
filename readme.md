@@ -75,12 +75,10 @@ We want to model providers (e.g. dietitians), their clients, and journal entries
 - `Clients` ```name: string, email_address: string, id: integer```
 - `Plans` (join table) ```provider_id: integer, client_id: integer, tier: string``` `"basic"` or `"premium"`
 - `JournalEntries` ```content: text, client_id: integer```
-
-- Note: `uuid` is also an option instead of integer ids, and an `enum` could be used in place of a `string` for plan `tier`
+- **Note: `uuid` is also an option instead of integer ids, and an `enum` could be used in place of a `string` for plan `tier`**
 
 #### Relationships:
-- The following model code will establish all the necessary relationships, and along with the schema describled above, relationships will connect models as described per the app description.
-
+- This following model code will establish all the necessary relationships, and along with the schema describled above, relationships will connect models as described per the app description.
 ```Ruby 
 class Clients < ApplicationRecord
   has_many :providers, through: plans
@@ -116,7 +114,7 @@ end
 @entries = Provider.find(params[:id]).clients.includes(:journal_entries).order(created_at: :desc) # recent first, ':asc' for oldest first
 ```
 
-#### Terminal commands to create and scaffold models for the diet-app
+### Instructions with terminal commands for creating and scaffold models for a new *diet-app*
 - `rails new diet-app`
 - `cd diet-app`
 - `rails g scaffold Provider name:string email_address:string`
@@ -124,45 +122,7 @@ end
 - `rails g scaffold JournalEntry content:text client:references`
 - `rails g scaffold Plan tier:string client:references provider:references`
 -  `rails db:create db:migrate`
-- Copy the **routing** described into `config/routes.rb` file 
-  - This will create some routes that have duplicate calls to some of the controller actions.  Without knowing how we want the application to look to the users, I can only guess as to which ones are best to prune
-- Add the above relationships to the respective models (if the scaffold generator didn't already)
-- Copy the following queries into the controller actions where you want to use them. 
-  - Note (params permissions, and how you access the correct params from the params hash may need to be change depending on which controller/action you choose for the query, since different controllers receive params in different format. 
-  - For example, in some cases `clients` will have its id come in as `params[:id]`, but others may be `params[:client_id]`). However, the fundamental logic/format of the queries is sound in principle.
-- At the command line, use `rails routes` to see all the routes/actions and how the `id` params are passed into controller actions.
-  ```Ruby 
-  @clients = Provider.find(params[:id]).clients
-  ```
-  ```Ruby 
-  @providers = Client.find(params[:id]).providers
-  ```
-  ```Ruby
-  @entries = Client.find(params[:id]).journal_entries.order(created_at: :desc) # recent first, ':asc' for oldest first
-  ```
-  ```Ruby
-  @entries = Provider.find(params[:id]).clients.includes(:journal_entries).order(created_at: :desc)
-  ```
-- Add the **relationships** code first show above above into the respective model files if one of the generators hasn't already.
-```Ruby
-# Find all clients for a particular provider: 
-@clients = Provider.find(params[:id]).clients 
-
-# Find all providers for a particular client: 
-@providers = Client.find(params[:id]).providers
-
-# Find all of a particular client's journal entries, sorted by date posted:
-@entries = Client.find(params[:id]).journal_entries.order(created_at: :desc) # recent first, ':asc' for oldest first
-
-# Find all of the journal entries of all of the clients of a particular provider, sorted by date posted: 
-@entries = Provider.find(params[:id]).clients.includes(:journal_entries).order(created_at: :desc) # recent first, ':asc' for oldest first
-```
-- Type `rails s` to create a server on your local machine.
-- navigate to `localhost:3000` in a browser, and you should see the new application running.
-
-- **Note: The instructions will get the app up and running, with more of 99% of code necessary created by the generators and/or pasted from this readme. However some routes and param permissions will need to be adjusted or pruned depending on how you want to display data, and which views want to use.  There is always multiple ways to accomplish functionality in Rails.**
-
-#### Routing
+- Copy this **routing** into `config/routes.rb` file:
 ```Ruby
 Rails.application.routes.draw do
   resources :providers do
@@ -177,3 +137,32 @@ Rails.application.routes.draw do
   root to: "client#index" # or whatever you want the root/home action to be
 end
 ```
+- **Note: This will create some routes that have duplicate calls to some of the controller actions.  Without knowing how we want the application to look/function for to two user types, I can only take best guesses as to which ones to prune later**
+- Add the relationship code to the respective models 
+  - **Note: The `belongs_to:` relationship code is not here like above, since the generators already added it to those models).**
+```Ruby 
+class Clients < ApplicationRecord
+  has_many :providers, through: plans
+  has_many :journal_entries
+end
+
+class Providers < ApplicationRecord
+  has_many :clients, through: plans
+end
+```
+- Copy the custom queries into the controller actions where you want to use them. 
+  - **Note: (params permissions, and how you access the correct params from the params hash may need to be change depending on which controller/action you choose for the query, since different controllers receive params in different format. 
+  For example, in some cases `clients` will have its id come in as `params[:id]`, but others may be `params[:client_id]`). However, the fundamental logic/format of the queries is sound in principle.**
+- At the command line, use `rails routes` to see all the routes/actions and how the `id` params are passed into controller actions.
+```Ruby 
+@clients = Provider.find(params[:id]).clients # Find all clients for a particular provider
+@providers = Client.find(params[:id]).providers # Find all providers for a particular client
+# Find all of a particular client's journal entries, sorted by date posted
+@entries = Client.find(params[:id]).journal_entries.order(created_at: :desc) # recent first, ':asc' for oldest first
+# Find all of the journal entries of all of the clients of a particular provider, sorted by date posted
+@entries = Provider.find(params[:id]).clients.includes(:journal_entries).order(created_at: :desc) # recent first, ':asc' for oldest first
+```
+- Type `rails s` to create a server on your local machine.
+- navigate to `localhost:3000` in a browser, and you should see the new application running.
+
+- **Note: These instructions will get the app up and running, with more of 99% of the necessary code created by the generators and/or pasted from this readme file. However, some routes and param permissions may need to be adjusted or pruned depending on how you want to display data, and which actions/views you want to use.  There are always multiple ways to accomplish your preferred functionality with Rails.**
