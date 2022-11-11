@@ -143,7 +143,20 @@ end
   ```Ruby
   @entries = Provider.find(params[:id]).clients.includes(:journal_entries).order(created_at: :desc)
   ```
-- Add the **relationships** code from above into the respective model files if one of the generators hasn't already.
+- Add the **relationships** code first show above above into the respective model files if one of the generators hasn't already.
+```Ruby
+# Find all clients for a particular provider: 
+@clients = Provider.find(params[:id]).clients 
+
+# Find all providers for a particular client: 
+@providers = Client.find(params[:id]).providers
+
+# Find all of a particular client's journal entries, sorted by date posted:
+@entries = Client.find(params[:id]).journal_entries.order(created_at: :desc) # recent first, ':asc' for oldest first
+
+# Find all of the journal entries of all of the clients of a particular provider, sorted by date posted: 
+@entries = Provider.find(params[:id]).clients.includes(:journal_entries).order(created_at: :desc) # recent first, ':asc' for oldest first
+```
 - Type `rails s` to create a server on your local machine.
 - navigate to `localhost:3000` in a browser, and you should see the new application running.
 
