@@ -92,12 +92,12 @@ class Providers < ApplicationRecord
 end
 
 class Plans < ApplicationRecord
-  belongs_to: clients
-  belongs_to: providers
+  belongs_to: client
+  belongs_to: provider
 end
 
 class JournalEntries < ApplicationRecord
-  belongs_to: clients
+  belongs_to: client
 end
 ```
 
@@ -107,7 +107,7 @@ end
 @clients = Provider.find(params[:id]).clients 
 
 # Find all providers for a particular client: 
-@providers = Client.find(params[:id]).clients
+@providers = Client.find(params[:id]).providers
 
 # Find all of a particular client's journal entries, sorted by date posted:
 @entries = Client.find(params[:id]).journal_entries.order(created_at: :desc) # recent first, ':asc' for oldest first
@@ -116,14 +116,27 @@ end
 @entries = Provider.find(params[:id]).clients.includes(:journal_entries).order(created_at: :desc) # recent first, ':asc' for oldest first
 ```
 
-# Scaffolding and commands to build
-```rails new diet-app```<br>
-```rails g scaffold Providers name:string email_address:string```<br>
-```rails g scaffold Clients name:string email_address:string```<br>
-```rails g scaffold JournalEntries content:text client_id:integer client:references```<br>
-```rails g scaffold Plans provider_id:integer client_id:integer tier:string client:references provider:references```<br>
- ```rails db:create db:migrate```<br>
- ```rails s```
+#### Scaffolding and commands to build diet-app
+- `rails new diet-app`
+- `cd diet-app`
+- `rails g scaffold Provider name:string email_address:string`
+- `rails g scaffold Client name:string email_address:string`
+- `rails g scaffold JournalEntry content:text client:references`
+- `rails g scaffold Plan tier:string client:references provider:references`
+-  `rails db:create db:migrate`
+- Aopy the below routing into 'config/routes.rb' file 
+  - This will create some routes that have duplicate calls to some of the controller actions.  Without knowing how we want the application to look to the users, I can only guess as to which ones are best to prune
+- Add the above relationships to the respective models (if the scaffold generator didn't already)
+- Add and adjust these queries from into the appropriate controller actions (params permissions and accessing the hash may need to change depending on which controller you add the query), but the logic/format is sound in principle.
+  - ```Ruby @clients = Provider.find(params[:id]).clients```
+  - ```Ruby @providers = Client.find(params[:id]).providers```
+  - ```Ruby @entries = Client.find(params[:id]).journal_entries.order(created_at: :desc) # recent first, ':asc' for oldest first```
+  - ```Ruby@entries = Provider.find(params[:id]).clients.includes(:journal_entries).order(created_at: :desc)```
+
+- `rails s`
+- navigate to `localhost:3000` in a browser, and you should see the new application running.
+
+- **Note: The above instructions will get the app up and running, with more of 99% of code necessary created by the generators and/or pasted from this readme. However some routes and param permissions will need to be adjusted or pruned depending on how you want to display data, and which views want to use.  There is always multiple ways to accomplish functionality in Rails.**
 
 #### Routing
 ```Ruby
@@ -131,12 +144,12 @@ Rails.application.routes.draw do
   resources :providers do
     resources :clients
   end
-  resources :clients do
+  resources :clients
     resources :providers
     resources :entries
+    resources
   end
 
-  root to: "providers#index
+  root to: "client#index" # or whatever you want the root/home action to be
+end
 ```
-
-
