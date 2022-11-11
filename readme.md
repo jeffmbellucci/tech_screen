@@ -116,7 +116,7 @@ end
 @entries = Provider.find(params[:id]).clients.includes(:journal_entries).order(created_at: :desc).map {|client| client.journal_entries } # recent first, ':asc' for oldest first
 ```
 
-#### Instructions with terminal commands for creating and scaffolding the a new *diet-app*
+#### Instructions with terminal commands for creating and scaffolding a new *diet-app*
 - `rails new diet-app`
 - `cd diet-app`
 - `rails g scaffold Provider name:string email_address:string`
@@ -124,7 +124,7 @@ end
 - `rails g scaffold JournalEntry content:text client:references`
 - `rails g scaffold Plan tier:string client:references provider:references`
 - ** Note: The scaffold generators added indexes on all the foreigh keys.  Indexes are an optimization to always keep in mind for speeding up some queries.  However, do not add indexes on everything, only `ids` or columns that are regularly used as a lookup for models that are read frequently.  You don't want to use indexes on columns that are regularly written to in the database.  While indexes can make lookups faster, they can also make writing to the database slower.  Use them judiciously.  In general, it is easiest to add indexes before you make a new model migration, but you can add indexes at any time via a new migration.
-- Copy the following code over everything in the `db/seeds.rb` file
+- Copy the following code over everything in the `db/seeds.rb` file.
   - **Note:** The seed file creates 3 clients, 3 providers, 6 plans, 12 journal entries, and makes sure every model created has all necessary relationships.  Always feel free to edit the seeds or create your own, but we need at least some data to make sure everything is working.
 ```Ruby
 client_names = %w[alice bob charles]
@@ -152,7 +152,7 @@ end
 ```
 -  Run `rails db:create db:migrate db:seed`
 - **Optional:** Create nested **routing** in `config/routes.rb` file if you want to play around with nested routes. However, I recommend using the default routing created for you at least at first for getting basic functionality working, and then go for experimentation with the routes.
-- Add `root to: <controller>#<action>` for whatever you want the app's base URL/`localhost:3000` to display, as well as setting the `root_path` and `root_url` helper methods.  I set mine to the client index.
+- Add `root to: <controller>#<action>` in the `routes.rb` file for whatever you want the app's base URL/`localhost:3000` to display, as well as setting the `root_path` and `root_url` helper methods.  I set mine to the client index.
 - This is what your `config/routes.rb` file should look like after you run all the generators and add a `root` path
 ```Ruby
 Rails.application.routes.draw do
@@ -200,8 +200,8 @@ end
 @entries = set_provider.clients.includes(:journal_entries).order(created_at: :desc).map { |client| client.journal_entries }
 ```
 - **Note:** At the command line, use `rails routes` at anytime to see a list of all routes and associated actions, path/url methods,  and the form of the `id` params for any controllers/actions, `rails routes` is always a useful reference.
-- Now you should be ready to type `rails s` to run the server on your local machine, if you haven't already
-- navigate to `localhost:3000` in a browser, and you should see the new application running.
+- Now you should be ready to type `rails s` to run the server on your local machine, if you haven't already.
+- Navigate to `localhost:3000` in a browser, and you should see the new application running.
 
 - **Note:** These instructions will get the app up and running with more of 99% of the necessary code created by the generators and/or pasted from this readme file. However, some views may need to be adjusted depending on how you want to display data, and which actions/views you decide to use want to use most. 
 - There are always multiple ways to accomplish your preferred functionality with Rails.  
