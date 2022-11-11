@@ -59,7 +59,11 @@ Create classes Cat, Dog, Chicken, CatFood, DogFood, HumanFood, Lemons
 - The `PrimeFinder` is invoked with a `runtime` value in seconds (or decimal fractions) and an optional boolean, ie.
   - `PrimeNumberFinder.new(5)` - prints largest and total number of primes found in 5secs
   - `PrimeNumberFinder.new(0.005, true)` - same as above, also prints the array of all primes found in 5ms
+
+### Rails Application
  
+#### Ive included descriptions of my design ideas and instructions for how to recreate this app from scratch if one were so inclined.  I figured this was a good opportunity to explain my thought process, and an example of how I like to create documentation.  I didn't include intructions for how I deployed it to Heroku, but if you are interested in seeing those intructions as well, I would be happy to add it here.  I wrote it as if I was explaining how to build this to someone new to Rails.  I have no intention of implying that you guys don't know how to do all of this stuff.  I just wanted to show my approach to explaining things.
+
 ### Database and model design with queries
 We want to model providers (e.g. dietitians), their clients, and journal entries.
 
@@ -123,9 +127,9 @@ end
 - `rails g scaffold Client name:string email_address:string`
 - `rails g scaffold JournalEntry content:text client:references`
 - `rails g scaffold Plan tier:string client:references provider:references`
-- ** Note: The scaffold generators added indexes on all the foreigh keys.  Indexes are an optimization to always keep in mind for speeding up some queries.  However, do not add indexes on everything, only `ids` or columns that are regularly used as a lookup for models that are read frequently.  You don't want to use indexes on columns that are regularly written to in the database.  While indexes can make lookups faster, they can also make writing to the database slower.  Use them judiciously.  In general, it is easiest to add indexes before you make a new model migration, but you can add indexes at any time via a new migration.
+- **Note:** The scaffold generators added indexes on all the foreigh keys.  Indexes are an optimization to always keep in mind for speeding up some queries.  However, do not add indexes on everything, only `ids` or columns that are regularly used as a lookup for models that are read frequently.  You don't want to use indexes on columns that are regularly written to in the database.  While indexes can make lookups faster, they can also make writing to the database slower.  Use them judiciously.  In general, it is easiest to add indexes before you make a new model migration, but you can add indexes at any time via a new migration.
 - Copy the following code over everything in the `db/seeds.rb` file.
-  - **Note:** The seed file creates 3 clients, 3 providers, 6 plans, 12 journal entries, and makes sure every model created has all necessary relationships.  Always feel free to edit the seeds or create your own, but we need at least some data to make sure everything is working.
+  - **Note:** The seed file creates 3 clients, 3 providers, 6 plans, 12 journal entries, and makes sure every model created has all necessary relationships.  Feel free to edit the seed file or create your own, but we need at least some data to make sure everything is working.
 ```Ruby
 client_names = %w[alice bob charles]
 provider_names = %w[dan ed fran]
@@ -151,8 +155,8 @@ providers.each_with_index do |provider, i| # create relationship between clients
 end
 ```
 -  Run `rails db:create db:migrate db:seed`
-- **Optional:** Create nested **routing** in `config/routes.rb` file if you want to play around with nested routes. However, I recommend using the default routing created for you at least at first for getting basic functionality working, and then go for experimentation with the routes.
-- Add `root to: <controller>#<action>` in the `routes.rb` file for whatever you want the app's base URL/`localhost:3000` to display, as well as setting the `root_path` and `root_url` helper methods.  I set mine to the client index.
+
+- Add `root to: <controller>#<action>` in the `config/routes.rb` file for whatever you want the app's base URL/`localhost:3000` to display, as well as setting the `root_path` and `root_url` helper methods.  I set mine to the client index.
 - This is what your `config/routes.rb` file should look like after you run all the generators and add a `root` path
 ```Ruby
 Rails.application.routes.draw do
@@ -164,24 +168,27 @@ Rails.application.routes.draw do
   root "clients#index" # or whatever you want the root/home action to be
 end
 ```
+- **Optional:** Use nested **routing** in `config/routes.rb` file if you want to play around with nested routes. However, I recommend using the default routing created by the scaffolding at least for getting basic functionality working, and then go for experimentation with the routes if you like.
 - **Note:** If you do use the nested routing instead of the defaults provided by the generators, it may create some routes that have duplicate calls to some controller actions.  Without knowing how we want the application to look/function for the user types at first, it might be difficult to decide which routeesto use and which to prune this early on the app development.  I think it's easiest to stick with default routing for awhile (When in doubt, follow the KISS principle, otherwise Murphy may getcha.)
 - Add the following relationship code to the respective models 
-  - **Note:** The `belongs_to:` relationship code is different here than what I listed above, because passing the gerators a `references` argument will have added them to the `JournalEntries` and `Provider` models, since those are the two models that have foreign keys on their schemas.
+  - **Note:** The `belongs_to:` relationship code is different here than what I listed above, because passing the generators a `references` argument will add the `belongs_to` references automagically to the `JournalEntries` and `Provider` models, since those are the two models that have foreign keys on their schemas.  Below is what needs to be added to `Clients` and `Providers`.
 ```Ruby 
 class Clients < ApplicationRecord
+  has_many :plans
   has_many :providers, through: :plans
-  has_many :journal_entries
+  has_many :journal_entries, dependent: destroy
 end
 
 class Providers < ApplicationRecord
+  has_many :plans
   has_many :clients, through: :plans
 end
 ```
 - Copy the custom queries into the controller actions where you want to use them.  I thought it was appropriate to put them in `providers#show` and `clients#show`, but you may have a different preference for how you want to use them.
-  - **Note:** (Again, if you change the default routing, params permitting, how you access ids from the params hash may need to be be updated if you used nested routing, since different routes/controllers send/receive params differently. For example, in some cases with nested routes, `clients` will have its `:id` available via `params[:id]`, but with other routes/controllers `params[:client_id]` may be how it is accessed). 
-  - I the fundamental logic/format of the queries is sound, you just may need to update how you access the `:id` that is passed in the params hash if you change the routing.
-  - **I found that the fastest way to show that all the queries are working, is to put everything called on the Providers class in `providers#show`, so queries 1 and 4, where we have access to the `provider` `:id` exactly how it is written below.
-  - Same thing goes for `clients#show` for queries 2 and 3.
+  - **Note:** (Again, if you change the default routing, params permitting and how you access `id`s from the params hash may need to be be updated if you use nested routing, since different routes/controllers send/receive params differently. For example, in some cases with nested routes, `clients` will have its `:id` available via `params[:id]`, but with other routes/controllers `params[:client_id]` may be how it is accessed). 
+  - I think the fundamental logic/format of the queries is sound (and they appear to work as expected), but you may need to update how you access the `:id` that is passed in the params hash if you change the routing.
+  - **I found that the fastest way to show that all the queries are working, is to put everything called on the Providers class in `providers#show`, so queries 1 and 4, where we have access to the `provider` `:id` are used exactly how as written below.
+  - Same thing goes for `clients#show` and queries 2 and 3.
 ```Ruby 
 @clients = Provider.find(params[:id]).clients # Find all clients for a particular provider, put in providers#show
 @providers = Client.find(params[:id]).providers # Find all providers for a particular client
@@ -190,9 +197,9 @@ end
 # Find all of the journal entries of all of the clients of a particular provider, sorted by date posted, put in clients#show
 @entries = Provider.find(params[:id]).clients.includes(:journal_entries).order(created_at: :desc).map {|client| client.journal_entries } # recent first, ':asc' for oldest first, put in providers#show
 ```
-- you can use the generated `set_<model>` methods to find the appropriate model instance, if you do, the queries will look like:
+- you can use the generated `set_<model>` methods to find the appropriate model instance, if you do, the queries will look like the following:
 ```Ruby
-# In the Clinet controller, under the #show action in my case
+# In the Clientt controller, under the #show action in my case
 @providers = set_client.providers
 @entries = set_client.journal_entries.order(created_at: :desc)
 # In the Providers controller, under the #show action in my case
@@ -203,9 +210,9 @@ end
 - Now you should be ready to type `rails s` to run the server on your local machine, if you haven't already.
 - Navigate to `localhost:3000` in a browser, and you should see the new application running.
 
-- **Note:** These instructions will get the app up and running with more of 99% of the necessary code created by the generators and/or pasted from this readme file. However, some views may need to be adjusted depending on how you want to display data, and which actions/views you decide to use want to use most. 
+- **Note:** These instructions will get the app up and running with more than 99% of the necessary code pasted from this readme file or added by the generators. However, some views may need to be adjusted depending on how you want to display data and which actions/views you decide to use the most. 
 - There are always multiple ways to accomplish your preferred functionality with Rails.  
 - I chose to primarily use `providers#index`, `providers#show`, `clients#index`, and `clients#show` to display the data I created in the seed file or with forms, and I added links to be able to switch back and forth between those two indexes as well as adding other convenience links.
 
 #### Final Note:
-I tried to write this last part of this readme for how to get the Rails app running as if I was instructing someone new how to create this app from scratch.  Please don't take it this document as if I don't think you guys know how to do everything here, either same or better.  I wanted to show how I generally write documentation.  I try to be as detailed as possible, and I like to think I have gotten pretty good at creating solid documentation.
+I tried to write this part of the main readme for how to get the Rails app running as if I was instructing someone new how to create this app from scratch.  Please don't take this document to mean I don't think you guys know how to do everything here, either the same or better than I did.  I wanted to show how I generally write documentation.  I try to be as detailed as possible, and I like to think I have gotten pretty good at creating solid documentation.
